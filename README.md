@@ -44,7 +44,7 @@ To install and run this example, you'll need a Python virtualenv with FastAPI in
 1. In the `app` directory, run:
 
     ```bash
-    uvicorn main:app --reload
+    uvicorn app.main:server --reload
     ```
 
 2. Open this link in your browser: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)

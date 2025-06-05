@@ -3,7 +3,7 @@
 import json
 import yaml
 
-from main import app
+from main import server
 
 
 def save_openapi_to_json():
@@ -11,7 +11,7 @@ def save_openapi_to_json():
 
     with open("openapi.json", "w", encoding="utf-8") as json_file:
         json.dump(
-            app.openapi(),
+            server.openapi(),
             json_file,
             indent=2,
         )
@@ -22,7 +22,7 @@ def save_openapi_to_yaml():
 
     with open("openapi.yaml", "w", encoding="utf-8") as yaml_file:
         yaml.dump(
-            app.openapi(),
+            server.openapi(),
             yaml_file,
         )
 

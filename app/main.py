@@ -235,7 +235,7 @@ def custom_generate_unique_id_function(route: APIRoute) -> str:
     return convert_snake_case_to_camel_case(route.name)
 
 
-app = FastAPI(
+server = FastAPI(
     servers=[
         {"url": "http://127.0.0.1:8000", "description": "Local server"},
     ],
@@ -252,7 +252,7 @@ burgers_db = []
 orders_db = []
 
 
-@app.post(
+@server.post(
     "/burger/",
     response_model=BurgerOutput,
     status_code=status.HTTP_201_CREATED,
@@ -270,7 +270,7 @@ def create_burger(burger: BurgerCreate):
     return BurgerOutput(**burger_data.dict())
 
 
-@app.get(
+@server.get(
     "/burger/",
     response_model=List[BurgerOutput],
     tags=["burger"],
@@ -299,7 +299,7 @@ def list_burgers(key: str = Depends(header_scheme)):
     return [BurgerOutput(**burger_data.dict()) for burger_data in burgers_db]
 
 
-@app.get(
+@server.get(
     "/burger/{burger_id}",
     response_model=BurgerOutput,
     responses={404: OPENAPI_RESPONSE_BURGER_NOT_FOUND},
@@ -314,7 +314,7 @@ def read_burger(burger_id: Annotated[int, Path(title="Burger ID")]):
     return response_burger_not_found(burger_id)
 
 
-@app.put(
+@server.put(
     "/burger/{burger_id}",
     response_model=BurgerOutput,
     responses={404: OPENAPI_RESPONSE_BURGER_NOT_FOUND},
@@ -332,7 +332,7 @@ def update_burger(burger_id: int, burger: BurgerUpdate):
     return response_burger_not_found(burger_id)
 
 
-@app.delete(
+@server.delete(
     "/burger/{burger_id}",
     responses={
         200: {"model": ResponseMessage, "description": "Burger deleted"},
@@ -354,7 +354,7 @@ def delete_burger(burger_id: Annotated[int, Path(title="Burger ID")]):
     return response_burger_not_found(burger_id)
 
 
-@app.post(
+@server.post(
     "/order/",
     response_model=OrderOutput,
     status_code=status.HTTP_201_CREATED,
@@ -374,14 +374,14 @@ def create_order(order: OrderCreate):
     return OrderOutput(**order_data.dict())
 
 
-@app.get("/order/", response_model=List[OrderOutput], tags=["order"])
+@server.get("/order/", response_model=List[OrderOutput], tags=["order"])
 def list_orders():
     """List all orders"""
 
     return [OrderOutput(**order_data.dict()) for order_data in orders_db]
 
 
-@app.get(
+@server.get(
     "/order/{order_id}",
     response_model=OrderOutput,
     responses={404: OPENAPI_RESPONSE_ORDER_NOT_FOUND},
@@ -396,7 +396,7 @@ def read_order(order_id: Annotated[int, Path(title="Order ID")]):
     return response_order_not_found(order_id)
 
 
-@app.put(
+@server.put(
     "/order/{order_id}",
     response_model=OrderOutput,
     responses={404: OPENAPI_RESPONSE_ORDER_NOT_FOUND},
@@ -414,7 +414,7 @@ def update_order(order_id: Annotated[int, Path(title="Order ID")], order: OrderU
     return response_order_not_found(order_id)
 
 
-@app.webhooks.post(
+@server.webhooks.post(
     "order-status-changed",
     operation_id="webhookOrderStatusChanged",
 )
@@ -429,18 +429,18 @@ def webhook_order_status_changed(body: OrderOutput):  # pylint: disable=unused-a
 def custom_openapi():
     """Customize OpenAPI Output"""
 
-    if app.openapi_schema:
-        return app.openapi_schema
+    if server.openapi_schema:
+        return server.openapi_schema
 
     openapi_schema = get_openapi(
-        title=app.title,
-        version=app.version,
-        summary=app.summary,
-        description=app.description,
-        servers=app.servers,
-        routes=app.routes,
-        tags=app.openapi_tags,
-        webhooks=app.webhooks.routes,
+        title=server.title,
+        version=server.version,
+        summary=server.summary,
+        description=server.description,
+        servers=server.servers,
+        routes=server.routes,
+        tags=server.openapi_tags,
+        webhooks=server.webhooks.routes,
     )
 
     openapi_schema["x-speakeasy-retries"] = {
@@ -457,8 +457,8 @@ def custom_openapi():
         "retryConnectionErrors": True,
     }
 
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
+    server.openapi_schema = openapi_schema
+    return server.openapi_schema
 
 
-app.openapi = custom_openapi
+server.openapi = custom_openapi
